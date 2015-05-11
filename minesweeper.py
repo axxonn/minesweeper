@@ -1,6 +1,7 @@
 #TODO generate mines after first click
 #TODO "clear" command
 #TODO disallow clicking flagged cells
+#TODO add help 
 
 from random import randrange
 size = 10 # int(raw_input("Enter board size PLS: "))
@@ -23,7 +24,6 @@ for mine in mines:
   board_internal[mine[0]][mine[1]] = 9
 # for mine in mines:
 #   print mine
-board_shown = [['#' for j in range(size)] for i in range(size)]
 
 def print_board(board):
   print ' ',
@@ -40,10 +40,13 @@ lost = False
 
 # design: functions refer to outside variables or take them all in? i'm doing a bit of both right now, seems like bad design
 
-# # - none
-# f - flagged
-# s - scavenged
-board_status = [['#' for j in range(size)] for i in range(size)]
+UNCLICKED_CHAR = '#' # both shown and status
+FLAGGED_CHAR = '>' # both shown and status
+SCAVENGED_CHAR_INTERNAL = 's' # only status
+MINE_CHAR = 'X'
+
+board_shown = [[UNCLICKED_CHAR for j in range(size)] for i in range(size)]
+board_status = [[UNCLICKED_CHAR for j in range(size)] for i in range(size)]
 
 #uses board_internal and board_shown
 def show(x, y):
@@ -53,14 +56,14 @@ def show(x, y):
 
 def scavenge_init(x, y):
   '''pre: (x, y) is valid coordinate'''
-  if board_status[x][y] == 's':
+  if board_status[x][y] == SCAVENGED_CHAR_INTERNAL:
     return # try again punk
   if (x, y) in mines:
-    board_shown[x][y] = 'X'
+    board_shown[x][y] = MINE_CHAR
     global lost #wtfffwtwwfjktwjfwfwtwf
     lost = True
     return
-  board_status[x][y] = 's'
+  board_status[x][y] = SCAVENGED_CHAR_INTERNAL
   show(x, y)
   for i in [-1, 0, 1]:
     for j in [-1, 0, 1]:
@@ -71,9 +74,9 @@ def scavenge(x, y):
     return
   if (x, y) in mines:
     return
-  if board_status[x][y] == 's':
+  if board_status[x][y] == SCAVENGED_CHAR_INTERNAL:
     return # try again punk
-  board_status[x][y] = 's'
+  board_status[x][y] = SCAVENGED_CHAR_INTERNAL
   show(x, y)
   if board_internal[x][y] != 0:
     return
@@ -82,29 +85,46 @@ def scavenge(x, y):
       scavenge(x+i, y+j)
 
 def flag(x, y):
-  if board_status[x][y] != '#':
+  if board_status[x][y] != UNCLICKED_CHAR:
     return
-  board_status[x][y] = 'f'
-  board_shown[x][y] = 'F'
+  board_status[x][y] = FLAGGED_CHAR
+  board_shown[x][y] = FLAGGED_CHAR
 
 def unflag(x, y):
-  if board_status[x][y] != 'f':
+  if board_status[x][y] != FLAGGED_CHAR:
     return
-  board_status[x][y] = '#'
-  board_shown[x][y] = '#'
+  board_status[x][y] = UNCLICKED_CHAR
+  board_shown[x][y] = UNCLICKED_CHAR
 
 def check_win():
   for i in range(size):
     for j in range(size):
-      if (i, j) not in mines and board_shown[i][j] == '#':
+      if (i, j) not in mines and board_shown[i][j] == UNCLICKED_CHAR:
         return False
   return True
+
+def help():
+  print '=========='
+  print '== HELP =='
+  print '=========='
+  print 'Minesweeper! Click strategically and leave only the mines unclicked to win!'
+  print 'Commands:'
+  print '- [click x y] to click the cell at (x, y)'
+  print '- [flag x y] to flag the cell at (x, y) as a mine'
+  print '- [unflag x y] to unflag the cell at (x, y)'
+  print 'Note: x is the row and y is the column'
+  print 'Click a mine and you lose!'
+  print 'Good luck!'
+  print '=========='
 
 commands = {'click': scavenge_init, 'flag': flag, 'unflag': unflag}
 
 print_board(board_shown)
 while not lost:
-  raw = raw_input('Enter a command: ').split(' ')
+  raw = raw_input('Enter a command (or enter \'h\' for help): ').split(' ')
+  if raw == ['h']:
+    help()
+    continue
   if len(raw) != 3 or raw[0] not in commands:
     continue
   f = commands[raw[0]]
