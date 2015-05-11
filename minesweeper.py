@@ -1,8 +1,10 @@
-#todo: generate mines after first click
+#TODO generate mines after first click
+#TODO "clear" command
+#TODO disallow clicking flagged cells
 
 from random import randrange
-size = 10#int(raw_input("Enter board size PLS: "))
-num_mines = 10#int(raw_input("Enter number of mines PLS: "))
+size = 10 # int(raw_input("Enter board size PLS: "))
+num_mines = 10 # int(raw_input("Enter number of mines PLS: "))
 mines = []
 for i in range(num_mines):
   diff = False
@@ -19,11 +21,10 @@ for mine in mines:
       if 0 <= x < size and 0 <= y < size and board_internal[x][y] < 9:
         board_internal[x][y] += 1
   board_internal[mine[0]][mine[1]] = 9
-for mine in mines:
-  print mine
-#board_shown = [[str(board_internal[i][j]) for j in range(size)] for i in range(size)]
+# for mine in mines:
+#   print mine
 board_shown = [['#' for j in range(size)] for i in range(size)]
-#print board_shown
+
 def print_board(board):
   print ' ',
   for i in range(size):
@@ -36,7 +37,6 @@ def print_board(board):
     print ''
 
 lost = False
-print 'im here'
 
 # design: functions refer to outside variables or take them all in? i'm doing a bit of both right now, seems like bad design
 
@@ -57,17 +57,13 @@ def scavenge_init(x, y):
     return # try again punk
   if (x, y) in mines:
     board_shown[x][y] = 'X'
-    print 'hey!'
     global lost #wtfffwtwwfjktwjfwfwtwf
     lost = True
-    print lost
-    print 'o!'
     return
   board_status[x][y] = 's'
   show(x, y)
   for i in [-1, 0, 1]:
     for j in [-1, 0, 1]:
-      #if not (i == j == 0): #don't need because already have scavenged check
       scavenge(x+i, y+j)
 
 def scavenge(x, y):
@@ -83,20 +79,8 @@ def scavenge(x, y):
     return
   for i in [-1, 0, 1]:
     for j in [-1, 0, 1]:
-      #if not (i == j == 0):
       scavenge(x+i, y+j)
 
-def flag2(x, y):
-  cur = board_status[x][y]
-  if cur == 's':
-    return # cannot flag this
-  if cur == '#':
-    board_status[x][y] = 'f'
-    board_shown[x][y] = 'F'
-  else: # already flagged
-    board_status[x][y] = '#'
-    board_shown[x][y] = '#'
-  
 def flag(x, y):
   if board_status[x][y] != '#':
     return
@@ -118,9 +102,8 @@ def check_win():
 
 commands = {'click': scavenge_init, 'flag': flag, 'unflag': unflag}
 
+print_board(board_shown)
 while not lost:
-  #do actual checking of validity later
-  #guess = raw_input('Enter a coordinate: ').split(' ')
   raw = raw_input('Enter a command: ').split(' ')
   if len(raw) != 3 or raw[0] not in commands:
     continue
@@ -132,12 +115,8 @@ while not lost:
     continue
   if not (0 <= x < size and 0 <= y < size):
     continue
-  #board_shown[x][y] = str(board_internal[x][y]) if (x, y) not in mines else 'X'
   f(x, y)
-  #print_board(board_internal)
   print_board(board_shown)
-  print lost
-  print check_win()
   if check_win():
     break
 
