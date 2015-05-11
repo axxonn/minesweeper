@@ -1,9 +1,9 @@
+#TODO disallow clicking flagged cells
 #TODO generate mines after first click
 #TODO "clear" command
-#TODO disallow clicking flagged cells
-#TODO add help 
 
 from random import randrange
+
 size = 10 # int(raw_input("Enter board size PLS: "))
 num_mines = 10 # int(raw_input("Enter number of mines PLS: "))
 mines = []
@@ -54,28 +54,17 @@ def show(x, y):
   val = board_internal[x][y]
   board_shown[x][y] = str(val) if val != 0 else '-'
 
-def scavenge_init(x, y):
-  '''pre: (x, y) is valid coordinate'''
+def scavenge(x, y):
+  if not (0 <= x < size and 0 <= y < size):
+    return
   if board_status[x][y] == SCAVENGED_CHAR_INTERNAL:
     return # try again punk
   if (x, y) in mines:
     board_shown[x][y] = MINE_CHAR
     global lost #wtfffwtwwfjktwjfwfwtwf
     lost = True
+    print lost
     return
-  board_status[x][y] = SCAVENGED_CHAR_INTERNAL
-  show(x, y)
-  for i in [-1, 0, 1]:
-    for j in [-1, 0, 1]:
-      scavenge(x+i, y+j)
-
-def scavenge(x, y):
-  if not (0 <= x < size and 0 <= y < size):
-    return
-  if (x, y) in mines:
-    return
-  if board_status[x][y] == SCAVENGED_CHAR_INTERNAL:
-    return # try again punk
   board_status[x][y] = SCAVENGED_CHAR_INTERNAL
   show(x, y)
   if board_internal[x][y] != 0:
@@ -113,11 +102,11 @@ def help():
   print '- [flag x y] to flag the cell at (x, y) as a mine'
   print '- [unflag x y] to unflag the cell at (x, y)'
   print 'Note: x is the row and y is the column'
-  print 'Click a mine and you lose!'
+  print 'Click on a mine and you lose!'
   print 'Good luck!'
   print '=========='
 
-commands = {'click': scavenge_init, 'flag': flag, 'unflag': unflag}
+commands = {'click': scavenge, 'flag': flag, 'unflag': unflag}
 
 print_board(board_shown)
 while not lost:
