@@ -1,6 +1,6 @@
-#TODO disallow clicking flagged cells
 #TODO generate mines after first click
 #TODO "clear" command
+#TODO refactor, perhaps put all printing in one place, think about making sure separate parts of logic are in separate pieces of code
 
 from random import randrange
 
@@ -59,11 +59,13 @@ def scavenge(x, y):
     return
   if board_status[x][y] == SCAVENGED_CHAR_INTERNAL:
     return # try again punk
+  if board_status[x][y] == FLAGGED_CHAR:
+    print 'Cannot click a flagged cell! Unflag if you really want to click it.'
+    return
   if (x, y) in mines:
     board_shown[x][y] = MINE_CHAR
     global lost #wtfffwtwwfjktwjfwfwtwf
     lost = True
-    print lost
     return
   board_status[x][y] = SCAVENGED_CHAR_INTERNAL
   show(x, y)
